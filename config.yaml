@@ -1,0 +1,5 @@
+http:
+  port: "8080"
+
+application: "order-processing-system"
+environment: "development"
