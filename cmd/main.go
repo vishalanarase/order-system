@@ -12,6 +12,8 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/vishalanarase/order-system/internal/api"
+	"github.com/vishalanarase/order-system/internal/kafka"
+	"github.com/vishalanarase/order-system/internal/services"
 	"github.com/vishalanarase/order-system/pkg/config"
 	"github.com/vishalanarase/order-system/pkg/logger"
 )
@@ -35,13 +37,23 @@ func main() {
 
 	log.Sugar().Infof("config: %+v", cfg)
 
+	// Create Kafka producer
+	producer, err := kafka.NewProducer(cfg.Kafka.Brokers, "orders")
+	if err != nil {
+		log.Sugar().Fatal("Failed to create Kafka producer", err)
+	}
+	defer producer.Close()
+
+	// Initialize services
+	orderService := services.NewOrderService(log, producer)
+
 	// Create context for graceful shutdown
 	_, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
 	// Setup HTTP server
 	router := gin.Default()
-	api.RegisterRoutes(log, router)
+	api.RegisterRoutes(log, router, orderService)
 
 	server := &http.Server{
 		Addr:         ":" + cfg.HTTP.Port,
