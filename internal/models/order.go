@@ -31,3 +31,16 @@ type OrderItem struct {
 	Quantity    int     `json:"quantity"`
 	Price       float64 `json:"price"`
 }
+
+type OrderEvent struct {
+	Type      string    `json:"type"`
+	Order     Order     `json:"order"`
+	Timestamp time.Time `json:"timestamp"`
+	Metadata  Metadata  `json:"metadata,omitempty"`
+}
+
+type Metadata struct {
+	CorrelationID string `json:"correlation_id"`
+	Source        string `json:"source"`
+	Attempt       int    `json:"attempt,omitempty"`
+}
