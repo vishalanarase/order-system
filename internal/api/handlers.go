@@ -8,6 +8,14 @@ import (
 func RegisterRoutes(log *zap.Logger, router *gin.Engine) {
 	healthHandler := NewHealthHandler(log)
 
+	orderHandler := NewOrderHandler(log)
+
 	// Health check endpoint
 	router.GET("/health", healthHandler.HealthCheck)
+
+	// Order endpoints
+	orders := router.Group("/orders")
+	{
+		orders.POST("", orderHandler.CreateOrder)
+	}
 }
