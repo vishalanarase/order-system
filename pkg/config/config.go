@@ -6,10 +6,18 @@ type HTTPConfig struct {
 	Port string `mapstructure:"port"`
 }
 
+type KafkaConfig struct {
+	Brokers  []string `mapstructure:"brokers"`
+	GroupID  string   `mapstructure:"group_id"`
+	Topics   []string `mapstructure:"topics"`
+	ClientID string   `mapstructure:"client_id"`
+}
+
 type AppConfig struct {
-	HTTP        HTTPConfig `mapstructure:"http"`
-	Application string     `mapstructure:"application"`
-	Environment string     `mapstructure:"environment"`
+	Kafka       KafkaConfig `mapstructure:"kafka"`
+	HTTP        HTTPConfig  `mapstructure:"http"`
+	Application string      `mapstructure:"application"`
+	Environment string      `mapstructure:"environment"`
 }
 
 func LoadConfig() (*AppConfig, error) {
@@ -20,6 +28,9 @@ func LoadConfig() (*AppConfig, error) {
 
 	// Set defaults
 	viper.SetDefault("http.port", "8080")
+	viper.SetDefault("kafka.brokers", []string{"localhost:9092"})
+	viper.SetDefault("kafka.group_id", "order-service-group")
+	viper.SetDefault("kafka.topics", []string{"orders", "payments", "notifications"})
 	viper.SetDefault("environment", "development")
 	viper.SetDefault("application", "order-processing-system")
 
