@@ -7,7 +7,7 @@ import (
 
 var Log *zap.Logger
 
-func InitLogger(environment string) error {
+func InitLogger(environment string) (*zap.Logger, error) {
 	var config zap.Config
 
 	if environment == "production" {
@@ -22,11 +22,11 @@ func InitLogger(environment string) error {
 
 	logger, err := config.Build()
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	Log = logger
-	return nil
+	return logger, nil
 }
 
 func Sync() {

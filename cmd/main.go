@@ -25,14 +25,15 @@ func main() {
 	}
 
 	// Initialize logger
-	if err := logger.InitLogger(cfg.Environment); err != nil {
-		log.Fatal("Failed to initialize logger:", err)
+	log, err := logger.InitLogger(cfg.Environment)
+	if err != nil {
+		log.Sugar().Fatal("Failed to initialize logger:", err)
 	}
 	defer logger.Sync()
 
-	logger.Log.Info("Starting Order Processing System")
+	log.Info("Starting Order Processing System")
 
-	logger.Log.Sugar().Infof("config: %+v", cfg)
+	log.Sugar().Infof("config: %+v", cfg)
 
 	// Create context for graceful shutdown
 	_, cancel := context.WithCancel(context.Background())
@@ -40,7 +41,7 @@ func main() {
 
 	// Setup HTTP server
 	router := gin.Default()
-	api.RegisterRoutes(router)
+	api.RegisterRoutes(log, router)
 
 	server := &http.Server{
 		Addr:         ":" + cfg.HTTP.Port,
@@ -52,10 +53,10 @@ func main() {
 
 	// Start server in goroutine
 	go func() {
-		logger.Log.Sugar().Infof("HTTP server starting on port: %s", cfg.HTTP.Port)
+		log.Sugar().Infof("HTTP server starting on port: %s", cfg.HTTP.Port)
 
 		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			logger.Log.Sugar().Fatalf("Failed to start HTTP server: %v", err)
+			log.Sugar().Fatalf("Failed to start HTTP server: %v", err)
 		}
 	}()
 
@@ -64,18 +65,18 @@ func main() {
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 	<-quit
 
-	logger.Log.Info("Shutting down server...")
+	log.Info("Shutting down server...")
 
 	// Graceful shutdown
 	shutdownCtx, shutdownCancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer shutdownCancel()
 
 	if err := server.Shutdown(shutdownCtx); err != nil {
-		logger.Log.Sugar().Errorf("Server forced to shutdown: ", err)
+		log.Sugar().Errorf("Server forced to shutdown: ", err)
 	}
 
 	cancel()                    // Cancel background processors context
 	time.Sleep(1 * time.Second) // Give time for graceful shutdown
 
-	logger.Log.Info("Server exited properly")
+	log.Info("Server exited properly")
 }

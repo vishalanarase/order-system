@@ -1,5 +1,15 @@
 http:
   port: "8080"
 
+kafka:
+  brokers:
+    - "localhost:9092"
+  group_id: "order-service-group"
+  topics:
+    - "orders"
+    - "payments"
+    - "notifications"
+  client_id: "order-service"
+
 application: "order-processing-system"
 environment: "development"
