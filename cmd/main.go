@@ -48,8 +48,11 @@ func main() {
 	orderService := services.NewOrderService(log, producer)
 
 	// Create context for graceful shutdown
-	_, cancel := context.WithCancel(context.Background())
+	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
+
+	// Start background processors
+	orderService.StartOrderProcessor(ctx, cfg.Kafka.Brokers)
 
 	// Setup HTTP server
 	router := gin.Default()
